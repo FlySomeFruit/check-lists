@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Корпоратив — Яхт-клуб Pelican</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1c2336;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text-secondary: #8b92a8;
+    --text-muted: #555d72;
+    --accent: #4f8ef7;
+    --accent-bg: rgba(79,142,247,0.1);
+    --accent-border: rgba(79,142,247,0.25);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.1);
+    --red: #f06a6a;
+    --red-bg: rgba(240,106,106,0.1);
+    --red-border: rgba(240,106,106,0.25);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    position: sticky;
+    top: 0;
+    background: rgba(14,17,23,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .header-title {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+
+  /* PROGRESS RING */
+  .progress-widget {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .ring-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+
+  .ring-wrap svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 4; }
+  .ring-fill { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s cubic-bezier(.4,0,.2,1);
+    stroke-dasharray: 138.23;
+    stroke-dashoffset: 138.23;
+  }
+
+  .ring-pct {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: var(--text);
+  }
+
+  .progress-labels { line-height: 1.3; }
+  .prog-main { font-size: 22px; font-weight: 600; color: var(--text); }
+  .prog-sub { font-size: 12px; color: var(--text-secondary); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    max-width: 860px;
+    margin: 1.5rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
+
+  /* TIMELINE STRIP */
+  .timeline {
+    max-width: 860px;
+    margin: 1.5rem auto 0;
+    padding: 0 2rem;
+  }
+
+  .tl-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tl-inner::-webkit-scrollbar { display: none; }
+
+  .tl-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 80px;
+    padding: 0 10px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .tl-item:first-child { padding-left: 0; }
+  .tl-item:last-child { border-right: none; }
+
+  .tl-time { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.04em; }
+  .tl-label { font-size: 11px; color: var(--text-secondary); line-height: 1.3; }
+
+  /* MAIN CONTENT */
+  .main { max-width: 860px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .section:hover { border-color: var(--border-strong); }
+  .section.all-done { border-color: rgba(62,207,142,0.2); }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    background: var(--surface);
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .section-head:hover { background: var(--surface2); }
+
+  .sec-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .sec-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .sec-bar {
+    width: 80px;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .sec-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.35s ease;
+  }
+
+  .sec-badge {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    width: 42px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .sec-badge.done { color: var(--green); }
+
+  .chevron {
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  /* SECTION BODY */
+  .section-body { background: var(--bg); }
+
+  /* GROUP LABEL */
+  .group-label {
+    padding: 10px 1.1rem 4px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-top: 1px solid var(--border);
+  }
+
+  .group-label:first-child { border-top: none; }
+
+  /* ITEM */
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 1.1rem;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-top: 1px solid transparent;
+  }
+
+  .item:hover { background: var(--surface2); }
+  .item.urgent { border-left: 2px solid var(--red); padding-left: calc(1.1rem - 2px); }
+
+  .cb {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    margin-top: 1px;
+    background: var(--surface);
+  }
+
+  .item.checked .cb {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .checkmark {
+    width: 10px; height: 7px;
+    border-left: 2px solid var(--bg);
+    border-bottom: 2px solid var(--bg);
+    transform: rotate(-45deg) translate(1px, -1px);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .item.checked .checkmark { opacity: 1; }
+
+  .item-content { flex: 1; min-width: 0; }
+
+  .item-label {
+    font-size: 14px;
+    color: var(--text);
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+  .item.checked .item-label { color: var(--text-muted); text-decoration: line-through; }
+
+  .hot-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    color: var(--red);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .item-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* RESET BTN */
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+
+  .reset-btn:hover { border-color: var(--red-border); color: var(--red); }
+
+  @media (max-width: 600px) {
+    .header { padding: 1.5rem 1rem 1rem; }
+    .filter-bar, .timeline, .main { padding-left: 1rem; padding-right: 1rem; }
+    .sec-bar { display: none; }
+    h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <div class="eyebrow">Корпоратив 2025</div>
+      <h1>Яхт-клуб Pelican</h1>
+      <div class="meta">
+        <span class="meta-item">35 гостей</span>
+        <span class="dot"></span>
+        <span class="meta-item">14:00 — 20:00</span>
+        <span class="dot"></span>
+        <span class="meta-item">Эко &amp; репродукция</span>
+      </div>
+    </div>
+    <div class="progress-widget">
+      <div class="ring-wrap">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle class="ring-bg" cx="26" cy="26" r="22"/>
+          <circle class="ring-fill" id="ring" cx="26" cy="26" r="22"/>
+        </svg>
+        <div class="ring-pct" id="ring-pct">0%</div>
+      </div>
+      <div class="progress-labels">
+        <div class="prog-main"><span id="hd">0</span> / <span id="ht">0</span></div>
+        <div class="prog-sub">пунктов выполнено</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">Все блоки</button>
+  <button class="filter-btn" data-filter="open">Не выполнено</button>
+  <button class="filter-btn" data-filter="urgent">Важные</button>
+  <button class="filter-btn" data-filter="done">Выполнено</button>
+</div>
+
+<div class="timeline">
+  <div class="tl-inner">
+    <div class="tl-item"><span class="tl-time">14:00</span><span class="tl-label">Welcome</span></div>
+    <div class="tl-item"><span class="tl-time">15:00</span><span class="tl-label">Офиц. часть + ролик</span></div>
+    <div class="tl-item"><span class="tl-time">16:00</span><span class="tl-label">Кавер №1</span></div>
+    <div class="tl-item"><span class="tl-time">16:30</span><span class="tl-label">Телешоу-игра</span></div>
+    <div class="tl-item"><span class="tl-time">18:00</span><span class="tl-label">Кавер №2</span></div>
+    <div class="tl-item"><span class="tl-time">18:30</span><span class="tl-label">Фокусник</span></div>
+    <div class="tl-item"><span class="tl-time">19:00</span><span class="tl-label">Торт</span></div>
+    <div class="tl-item"><span class="tl-time">19:15</span><span class="tl-label">Кавер №3</span></div>
+    <div class="tl-item"><span class="tl-time">19:45</span><span class="tl-label">Завершение</span></div>
+  </div>
+</div>
+
+<main class="main" id="main"></main>
+
+<div class="footer">
+  <div>Корпоратив Яхт-клуб Pelican · Чеклист организатора</div>
+  <button class="reset-btn" id="reset-btn">Сбросить всё</button>
+</div>
+
+<script>
+const DATA = [
+  {id:'venue', icon:'⚓', title:'Площадка — Яхт-клуб Pelican', items:[
+    {g:'Договор и оплата'},
+    {t:'Подписан договор аренды площадки', n:'Проверить пункты про пробковый сбор и сторонний алкоголь'},
+    {t:'Внесён аванс / оплата по договору'},
+    {t:'Подтверждены дата и время: 14:00–20:00', n:'Учесть время на монтаж — договориться о доступе с 10–11:00'},
+    {t:'Согласовано время монтажа и демонтажа'},
+    {t:'Согласован пробковый сбор: сумма и условия', hot:true},
+    {g:'Логистика площадки'},
+    {t:'Выяснен контакт менеджера/администратора в день события'},
+    {t:'Согласованы шумовые ограничения: до какого часа'},
+    {t:'Уточнено: кто отвечает за уборку до и после'},
+    {t:'Парковка: сколько мест, как организован въезд'},
+    {t:'Отмечено место для 20 пуфиков и фотозоны'},
+    {t:'Согласовано место для кейтеринговой кухни/раздачи'},
+    {t:'Согласовано место для сцены и звукового оборудования'},
+    {t:'Уточнено наличие розеток/мощности для техники'},
+    {t:'Подтверждено: есть навес/шатёр на случай дождя'},
+  ]},
+  {id:'catering', icon:'🍽', title:'Кейтеринг', items:[
+    {g:'Меню и согласование'},
+    {t:'Подписан договор с кейтерингом'},
+    {t:'Согласовано меню welcome (14:00) и банкет (15:00+)'},
+    {t:'Согласованы б/а напитки: ассортимент и количество'},
+    {t:'Уточнены диетические ограничения сотрудников', n:'Вегетарианцы, аллергики, халяль и пр.'},
+    {t:'Согласован формат подачи: фуршет / банкет / комбо'},
+    {t:'Согласовано время подачи торта: 19:00–19:15'},
+    {g:'Алкоголь (пробковый сбор)'},
+    {t:'Определён список алкоголя, который привозим сами'},
+    {t:'Рассчитано количество на 35 человек'},
+    {t:'Уточнено: нужен ли список ввозимого алкоголя заранее'},
+    {t:'Согласован способ расчёта пробкового сбора: за бутылку / за человека'},
+    {g:'Торт'},
+    {t:'Заказан торт 7 кг, начинка баноффи', hot:true},
+    {t:'Согласован логотип компании на торте', n:'Передать макет логотипа кондитеру'},
+    {t:'Уточнена дата готовности и доставки торта'},
+    {t:'Согласован способ доставки торта на площадку'},
+    {t:'Уточнено: кейтеринг хранит торт до выноса?'},
+  ]},
+  {id:'tech', icon:'🔊', title:'Техническое обеспечение', items:[
+    {g:'Договор и состав'},
+    {t:'Подписан договор на звук и свет в шатре'},
+    {t:'Подтверждён состав: звук + свет + техспециалист + режиссёр света'},
+    {g:'Технические согласования'},
+    {t:'Запрошен технический райдер у кавер-группы', hot:true, n:'Должен совпасть с тем, что даёт техподрядчик'},
+    {t:'Запрошен технический райдер у диджея'},
+    {t:'Согласован монтаж: время приезда и расстановка'},
+    {t:'Согласована схема расстановки оборудования с площадкой'},
+    {t:'Подтверждено наличие микрофона для ведущего'},
+    {t:'Подтверждено наличие микрофонов для телешоу-программы'},
+    {t:'Согласован саундчек: время ДО начала мероприятия', n:'Оптимально — за 2–3 часа, до прихода гостей'},
+    {g:'Плазма 100"'},
+    {t:'Подтверждена аренда плазмы 100" на стойке'},
+    {t:'Согласовано подключение к источнику для показа ролика'},
+    {t:'Проверен формат файла ролика совместим с экраном'},
+  ]},
+  {id:'transport', icon:'🚌', title:'Трансфер', items:[
+    {g:'Бронирование'},
+    {t:'Определено: один трансфер (туда) или два (туда/обратно)', hot:true, n:'Два трансфера = 48 000 руб.'},
+    {t:'Подписан договор на трансфер'},
+    {t:'Согласованы точки посадки, маршрут'},
+    {t:'Подтверждено время отправления (~13:00–13:30, к 14:00 на месте)'},
+    {t:'Если обратно — согласовано время: ~20:00–20:15'},
+    {t:'Доведена информация о трансфере до всех 35 участников'},
+    {t:'Назначен ответственный за сбор группы у трансфера'},
+  ]},
+  {id:'mc', icon:'🎤', title:'Ведущий', items:[
+    {g:'Договор и брифинг'},
+    {t:'Подписан договор: 5 часов работы'},
+    {t:'Передан тайминг ведущему (14:00–20:00)'},
+    {t:'Согласован сценарий: официальная часть, игра, переходы'},
+    {t:'Согласована официальная часть: кто выступает, сколько времени'},
+    {t:'Согласован момент показа ролика о компании'},
+    {t:'Согласованы переходы: кавер-группа ↔ ведущий ↔ диджей'},
+    {t:'Передана информация о компании и её тематике', n:'Эко-направление и репродукция — ведущий должен понимать контекст'},
+    {t:'Согласованы «табу»: темы, шутки, имена — что нельзя'},
+    {t:'Согласован момент выноса торта и поздравление'},
+    {t:'Ведущий знает имена ключевых людей (директор, юбиляры)'},
+    {t:'Согласованы призы и подарки для телешоу-игры'},
+  ]},
+  {id:'show', icon:'🎯', title:'Программа телешоу', items:[
+    {g:'Выбор и подготовка'},
+    {t:'Выбрана игра: «Угадай мелодию» / «100 к 1» / «Где логика»', hot:true},
+    {t:'Согласована игра с ведущим'},
+    {t:'Подготовлены вопросы/задания под тематику компании (эко, репродукция)'},
+    {t:'Согласован тайминг: 16:30–18:00 (1,5 часа)'},
+    {t:'Определены команды или формат участия 35 человек'},
+    {t:'Подготовлены реквизиты: buzzers, карточки, экран'},
+    {t:'Контент игры выводится на плазму 100" — проверен вывод'},
+    {t:'Согласованы призы победителям'},
+  ]},
+  {id:'cover', icon:'🎸', title:'Кавер-группа', items:[
+    {g:'Договор'},
+    {t:'Подписан договор: 4 человека, 3 выхода по 30 мин'},
+    {t:'Подтверждён состав: м. вокал, ж. вокал, барабаны, гитара'},
+    {t:'Согласована схема выходов: 16:00 / 18:00 / 19:15'},
+    {g:'Репертуар — ключевое'},
+    {t:'Запрошен полный репертуарный лист группы', hot:true, n:'Не промо-подборка, а весь перечень — у профи 80–200 треков'},
+    {t:'Согласован плейлист под аудиторию компании'},
+    {t:'Согласованы обязательные треки (топ 5–10 хитов вечера)'},
+    {t:'Уточнено: могут ли выучить 1–2 трека специально под вечер'},
+    {t:'Согласован дресс-код / сценические костюмы группы'},
+    {g:'Технический райдер'},
+    {t:'Получен и согласован технический райдер группы'},
+    {t:'Подтверждено: кто обеспечивает звук — подрядчик или группа свой'},
+    {t:'Согласован саундчек: время и место ДО прихода гостей'},
+    {t:'Уточнено: нужны ли гримёрка / питание / парковка для группы'},
+    {g:'День мероприятия'},
+    {t:'Подтверждено время прибытия группы для монтажа'},
+    {t:'Назначен контакт для группы на площадке в день события'},
+  ]},
+  {id:'dj', icon:'🎧', title:'Диджей', items:[
+    {g:'Договор и согласования'},
+    {t:'Подписан договор: 6 часов работы'},
+    {t:'Согласован тайминг: заполняет паузы между выходами кавер-группы'},
+    {t:'Согласован стиль/жанр музыки, уместный для аудитории'},
+    {t:'Получен и согласован технический райдер диджея'},
+    {t:'Подтверждено: оборудование совместимо с техподрядчиком'},
+    {t:'Согласован «стоп-лист» — треки, которые точно не нужны'},
+    {t:'Согласован момент смены: кавер-группа закончила → диджей подхватывает'},
+  ]},
+  {id:'photo', icon:'📷', title:'Фотограф', items:[
+    {g:'Договор и задание'},
+    {t:'Подписан договор: 3 часа работы'},
+    {t:'Согласовано время присутствия', n:'Рекомендуется: с 14:00 (welcome) до 17:00, или 15:00–18:00'},
+    {t:'Сформировано техзадание: что обязательно снять', n:'Официальная часть, ролик, кавер-группа, игра, торт, фотозона'},
+    {t:'Согласован список VIP-кадров: директор, команды, отделы'},
+    {t:'Согласован формат и срок сдачи фото'},
+    {t:'Фотограф уведомлён о фотозоне — отснять в начале'},
+    {t:'Уточнена политика публикации фото в соцсетях / каналах'},
+  ]},
+  {id:'photozone', icon:'🌿', title:'Фотозона', items:[
+    {g:'Подготовка'},
+    {t:'Утверждён дизайн фотозоны', n:'Тематика: эко, природа, логотип компании'},
+    {t:'Согласовано место установки фотозоны на площадке'},
+    {t:'Подтверждена дата доставки и монтажа (до гостей)'},
+    {t:'Проверено освещение фотозоны — достаточно для фото'},
+    {t:'Фотограф уведомлён о расположении фотозоны'},
+  ]},
+  {id:'magician', icon:'✨', title:'Фокусник', items:[
+    {g:'Договор и программа'},
+    {t:'Подписан договор: программа 30 минут'},
+    {t:'Согласован тайминг: 18:30–19:00'},
+    {t:'Согласовано место выступления: в зале / между столами / сцена'},
+    {t:'Уточнено: нужен ли реквизит заранее / ассистент из гостей'},
+    {t:'Уточнена отдельная микрофонная точка для фокусника'},
+    {t:'Передана информация об аудитории (35 взрослых, тематика вечера)'},
+  ]},
+  {id:'video', icon:'🎬', title:'Ролик о компании', items:[
+    {g:'Производство'},
+    {t:'Подписан договор на создание ролика/клипа', hot:true},
+    {t:'Согласован хронометраж ролика', n:'Для показа в 15:00 — рекомендуется 3–7 минут'},
+    {t:'Переданы материалы: фото, видео, логотип, тексты'},
+    {t:'Согласована концепция: что транслирует ролик'},
+    {t:'Согласован дедлайн финальной версии', hot:true, n:'Минимум за 3 дня до мероприятия — чтобы успеть проверить'},
+    {t:'Финальная версия получена и одобрена заказчиком'},
+    {g:'Техническая подготовка'},
+    {t:'Ролик сохранён в нужном формате', n:'MP4 H.264 — уточнить у техподрядчика'},
+    {t:'Файл ролика передан техническому специалисту заранее'},
+    {t:'Проведён тестовый показ ролика на плазме'},
+  ]},
+  {id:'pouf', icon:'🛋', title:'Пуфики / кресла-мешки (20 шт)', items:[
+    {t:'Подписан договор на аренду 20 кресел-мешков'},
+    {t:'Согласовано место расстановки: welcome-зона / зона отдыха'},
+    {t:'Подтверждено время доставки и вывоза'},
+    {t:'Уточнено: кто расставляет и убирает'},
+  ]},
+  {id:'guests', icon:'👥', title:'Гости и коммуникация', items:[
+    {g:'Приглашения'},
+    {t:'Разосланы приглашения всем 35 сотрудникам'},
+    {t:'Собраны подтверждения присутствия'},
+    {t:'Уточнены диетические ограничения и аллергии'},
+    {t:'Сообщена информация о трансфере: время, место сбора'},
+    {t:'Сообщён дресс-код (если есть)'},
+    {g:'День мероприятия'},
+    {t:'Назначен ответственный за встречу гостей на welcome'},
+    {t:'Подготовлены бейджи или рассадочные карточки (если нужно)'},
+    {t:'Назначен контакт для вопросов от гостей в день события'},
+  ]},
+  {id:'day', icon:'🗓', title:'День мероприятия — контроль', items:[
+    {g:'Накануне вечером'},
+    {t:'Обзвон всех подрядчиков: подтвердить приезд'},
+    {t:'Распечатан тайминг, розданы копии ведущему, технику, кейтерингу'},
+    {t:'Файл ролика на флешке/ноуте у технического специалиста'},
+    {g:'Монтаж (10:00–13:30)'},
+    {t:'Техподрядчик смонтировал звук и свет'},
+    {t:'Кавер-группа провела саундчек'},
+    {t:'Диджей проверил оборудование'},
+    {t:'Фотозона установлена'},
+    {t:'Пуфики расставлены'},
+    {t:'Кейтеринг готов к welcome'},
+    {t:'Тест-показ ролика на плазме пройден'},
+    {g:'Программа — контроль времени'},
+    {t:'14:00 — welcome открыт, ведущий на месте'},
+    {t:'15:00 — официальная часть начата вовремя'},
+    {t:'15:xx — показ ролика прошёл без сбоев'},
+    {t:'16:00 — 1-й выход кавер-группы'},
+    {t:'16:30 — старт телешоу-игры'},
+    {t:'18:00 — 2-й выход кавер-группы'},
+    {t:'18:30 — выступление фокусника'},
+    {t:'19:00 — вынос торта, поздравление'},
+    {t:'19:15 — 3-й выход кавер-группы'},
+    {t:'19:45 — завершение программы ведущим'},
+    {g:'Завершение'},
+    {t:'Трансфер обратно подан вовремя (если заказан)'},
+    {t:'Гости проводжены, благодарности сказаны'},
+    {t:'Сбор обратной связи от участников'},
+  ]},
+];
+
+const STORE_KEY = 'pelican_checklist_v1';
+
+let state = {};
+try {
+  const saved = localStorage.getItem(STORE_KEY);
+  if (saved) state = JSON.parse(saved);
+} catch(e) {}
+
+function allKeys() {
+  const keys = [];
+  DATA.forEach(s => s.items.forEach((it,i) => { if(it.t) keys.push(s.id+'_'+i); }));
+  return keys;
+}
+
+allKeys().forEach(k => { if(!(k in state)) state[k] = false; });
+
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function countSection(sec) {
+  let total=0, done=0;
+  sec.items.forEach((it,i) => { if(it.t){ total++; if(state[sec.id+'_'+i]) done++; } });
+  return {total, done};
+}
+
+function totalCounts() {
+  let total=0, done=0;
+  DATA.forEach(s => { const c=countSection(s); total+=c.total; done+=c.done; });
+  return {total, done};
+}
+
+function updateHeader() {
+  const {total, done} = totalCounts();
+  document.getElementById('hd').textContent = done;
+  document.getElementById('ht').textContent = total;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('ring-pct').textContent = pct+'%';
+  const circ = 2 * Math.PI * 22;
+  document.getElementById('ring').style.strokeDashoffset = circ - (circ * pct / 100);
+}
+
+let currentFilter = 'all';
+
+function renderSections() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  DATA.forEach(sec => {
+    const {total, done} = countSection(sec);
+    const pct = total ? Math.round(done/total*100) : 0;
+    const allDone = done === total && total > 0;
+
+    if (currentFilter === 'done' && done === 0) return;
+    if (currentFilter === 'open' && done === total && total > 0) return;
+    if (currentFilter === 'urgent') {
+      const hasUrgent = sec.items.some(it => it.hot && !state);
+      const hasUncheckedUrgent = sec.items.some((it,i) => it.hot && !state[sec.id+'_'+i]);
+      if (!hasUncheckedUrgent) return;
+    }
+
+    const secEl = document.createElement('div');
+    secEl.className = 'section' + (allDone ? ' all-done' : '');
+    secEl.dataset.id = sec.id;
+
+    let itemsHtml = '';
+    sec.items.forEach((it, i) => {
+      if (it.g) {
+        itemsHtml += `<div class="group-label">${it.g}</div>`;
+        return;
+      }
+      const key = sec.id+'_'+i;
+      const checked = state[key];
+
+      if (currentFilter === 'open' && checked) return;
+      if (currentFilter === 'done' && !checked) return;
+      if (currentFilter === 'urgent' && !it.hot) return;
+
+      itemsHtml += `
+        <div class="item${checked?' checked':''}${it.hot?' urgent':''}" data-key="${key}">
+          <div class="cb"><div class="checkmark"></div></div>
+          <div class="item-content">
+            <div class="item-label">${it.t}${it.hot?'<span class="hot-badge">важно</span>':''}</div>
+            ${it.n?`<div class="item-note">${it.n}</div>`:''}
+          </div>
+        </div>`;
+    });
+
+    if (!itemsHtml.replace(/<div class="group-label">.*?<\/div>/g,'').trim()) return;
+
+    secEl.innerHTML = `
+      <div class="section-head">
+        <div class="sec-icon">${sec.icon}</div>
+        <div class="sec-title">${sec.title}</div>
+        <div class="sec-bar"><div class="sec-bar-fill" style="width:${pct}%; background:${allDone?'var(--green)':'var(--accent)'}"></div></div>
+        <div class="sec-badge${allDone?' done':''}">${done}/${total}</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="section-body">${itemsHtml}</div>`;
+
+    secEl.querySelector('.section-head').addEventListener('click', () => {
+      secEl.classList.toggle('collapsed');
+    });
+
+    secEl.querySelectorAll('.item').forEach(el => {
+      el.addEventListener('click', () => {
+        const key = el.dataset.key;
+        state[key] = !state[key];
+        save();
+        renderSections();
+        updateHeader();
+      });
+    });
+
+    main.appendChild(secEl);
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderSections();
+  });
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Сбросить все отметки?')) {
+    allKeys().forEach(k => state[k] = false);
+    save();
+    renderSections();
+    updateHeader();
+  }
+});
+
+renderSections();
+updateHeader();
+</script>
+</body>
+</html>
