@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Координатор — Даша · Яхт-клуб Pelican</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1c2336;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --text-secondary: #8b92a8;
+    --text-muted: #555d72;
+    --accent: #4f8ef7;
+    --accent-bg: rgba(79,142,247,0.1);
+    --accent-border: rgba(79,142,247,0.25);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.08);
+    --green-border: rgba(62,207,142,0.25);
+    --red: #f06a6a;
+    --red-bg: rgba(240,106,106,0.1);
+    --red-border: rgba(240,106,106,0.25);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.1);
+    --amber-border: rgba(245,166,35,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  .header { border-bottom: 1px solid var(--border); padding: 2rem 2rem 0; position: sticky; top: 0; background: rgba(14,17,23,0.94); backdrop-filter: blur(12px); z-index: 100; }
+  .header-inner { max-width: 820px; margin: 0 auto; display: flex; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap; padding-bottom: 1.25rem; }
+  .header-title { flex: 1; min-width: 200px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 0.3rem; }
+  h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 400; line-height: 1.2; }
+  .meta { font-size: 12px; color: var(--text-secondary); margin-top: 0.3rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text-muted); }
+
+  .progress-widget { display: flex; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.65rem 1.1rem; flex-shrink: 0; }
+  .ring-wrap { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 4; }
+  .ring-fill { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.5s cubic-bezier(.4,0,.2,1); stroke-dasharray: 125.66; stroke-dashoffset: 125.66; }
+  .ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .prog-main { font-size: 20px; font-weight: 600; }
+  .prog-sub { font-size: 11px; color: var(--text-secondary); }
+
+  .tabs { max-width: 820px; margin: 0 auto; padding: 0 2rem; display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); padding: 0.6rem 1rem; font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; white-space: nowrap; transition: all 0.15s; margin-bottom: -1px; }
+  .tab:hover { color: var(--text-secondary); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.5rem; margin-bottom: 1.5rem; }
+  .contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 10px; }
+  .contact-card.key { border-color: var(--amber-border); background: var(--amber-bg); }
+  .contact-avatar { width: 34px; height: 34px; border-radius: 8px; background: var(--accent-bg); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; font-weight: 600; color: var(--accent); font-family: 'Inter', sans-serif; }
+  .contact-card.key .contact-avatar { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-role { font-size: 11px; color: var(--text-muted); }
+  .contact-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .contact-phone { font-size: 13px; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .contact-card.key .contact-phone { color: var(--amber); }
+
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem; margin-bottom: 1.5rem; }
+  .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem; }
+  .info-card.warn { border-color: var(--red-border); background: var(--red-bg); }
+  .info-card.amber { border-color: var(--amber-border); background: var(--amber-bg); }
+  .info-card.green { border-color: var(--green-border); background: var(--green-bg); }
+  .info-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+  .info-card.warn .info-label { color: var(--red); }
+  .info-card.amber .info-label { color: var(--amber); }
+  .info-card.green .info-label { color: var(--green); }
+  .info-value { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .parking-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; margin-bottom: 1.5rem; }
+  .parking-slot { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 12px; }
+  .parking-slot .slot-num { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.05em; }
+  .parking-slot .slot-name { color: var(--text); font-weight: 500; margin-top: 2px; }
+  .parking-slot.reserve { border-style: dashed; }
+  .parking-slot.reserve .slot-name { color: var(--text-muted); }
+
+  .food-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1.5rem; }
+  .food-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .food-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .food-item:last-child { border-bottom: none; }
+  .food-count { font-size: 11px; background: var(--accent-bg); color: var(--accent); border-radius: 4px; padding: 1px 6px; flex-shrink: 0; }
+  .food-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .tl-block { margin-bottom: 1.5rem; }
+  .tl-row { display: flex; position: relative; padding-left: 80px; margin-bottom: 2px; }
+  .tl-row::before { content: ''; position: absolute; left: 62px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+  .tl-time { position: absolute; left: 0; top: 10px; font-size: 12px; font-weight: 600; color: var(--accent); width: 55px; text-align: right; font-variant-numeric: tabular-nums; }
+  .tl-dot { position: absolute; left: 57px; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border-strong); z-index: 1; }
+  .tl-row.hot .tl-dot { background: var(--red); border-color: var(--red); }
+  .tl-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+  .tl-row.hot .tl-card { border-color: var(--red-border); }
+  .tl-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .tl-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .section { margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .section:hover { border-color: var(--border-strong); }
+  .section.all-done { border-color: rgba(62,207,142,0.2); }
+  .section-head { display: flex; align-items: center; gap: 10px; padding: 0.85rem 1.1rem; cursor: pointer; background: var(--surface); user-select: none; transition: background 0.15s; }
+  .section-head:hover { background: var(--surface2); }
+  .sec-icon { width: 30px; height: 30px; border-radius: 7px; background: var(--accent-bg); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .sec-title { font-size: 14px; font-weight: 500; flex: 1; }
+  .sec-bar { width: 70px; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+  .sec-bar-fill { height: 100%; border-radius: 2px; transition: width 0.35s; }
+  .sec-badge { font-size: 12px; color: var(--text-secondary); width: 38px; text-align: right; flex-shrink: 0; }
+  .sec-badge.done { color: var(--green); }
+  .chevron { font-size: 13px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+  .section.collapsed .chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+  .section-body { background: var(--bg); }
+  .group-label { padding: 9px 1.1rem 3px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; border-top: 1px solid var(--border); }
+  .group-label:first-child { border-top: none; }
+  .item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 1.1rem; cursor: pointer; transition: background 0.1s; }
+  .item:hover { background: var(--surface2); }
+  .item.urgent { border-left: 2px solid var(--red); padding-left: calc(1.1rem - 2px); }
+  .cb { width: 17px; height: 17px; border: 1.5px solid var(--border-strong); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 2px; background: var(--surface); }
+  .item.checked .cb { background: var(--green); border-color: var(--green); }
+  .checkmark { width: 9px; height: 6px; border-left: 2px solid var(--bg); border-bottom: 2px solid var(--bg); transform: rotate(-45deg) translate(1px,-1px); opacity: 0; transition: opacity 0.15s; }
+  .item.checked .checkmark { opacity: 1; }
+  .item-label { font-size: 13px; color: var(--text); transition: color 0.15s; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .item.checked .item-label { color: var(--text-muted); text-decoration: line-through; }
+  .hot-badge { font-size: 10px; padding: 1px 6px; border-radius: 9px; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .item-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+  .main { max-width: 820px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+  .block-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 0.75rem; }
+  .filter-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filter-btn { background: none; border: 1px solid var(--border-strong); color: var(--text-secondary); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
+  .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+  .footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); max-width: 820px; margin: 0 auto; }
+  .reset-btn { background: none; border: 1px solid var(--border-strong); color: var(--text-muted); border-radius: 6px; padding: 4px 12px; font-size: 12px; font-family: 'Inter', sans-serif; cursor: pointer; margin-top: 8px; transition: all 0.15s; }
+  .reset-btn:hover { border-color: var(--red-border); color: var(--red); }
+
+  @media (max-width: 600px) {
+    .header { padding: 1.25rem 1rem 0; }
+    .main { padding: 1.25rem 1rem 3rem; }
+    .parking-grid { grid-template-columns: repeat(2, 1fr); }
+    .sec-bar { display: none; }
+    .tabs { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <div class="eyebrow">Координатор · день мероприятия</div>
+      <h1>Даша · Яхт-клуб Pelican</h1>
+      <div class="meta">
+        <span>35 гостей</span>
+        <span class="dot"></span>
+        <span>Монтаж 11:00 · Старт 14:00 · Финал 20:00</span>
+      </div>
+    </div>
+    <div class="progress-widget">
+      <div class="ring-wrap">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle class="ring-bg" cx="24" cy="24" r="20"/>
+          <circle class="ring-fill" id="ring" cx="24" cy="24" r="20"/>
+        </svg>
+        <div class="ring-pct" id="ring-pct">0%</div>
+      </div>
+      <div>
+        <div class="prog-main"><span id="hd">0</span>/<span id="ht">0</span></div>
+        <div class="prog-sub">выполнено</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="contacts">Контакты</button>
+    <button class="tab" data-tab="info">Нюансы</button>
+    <button class="tab" data-tab="timeline">Тайминг</button>
+    <button class="tab" data-tab="vendors">Приезд подрядчиков</button>
+    <button class="tab" data-tab="checklist">Чеклист (бесполезная для тебя хрень)</button>
+  </div>
+</header>
+
+<!-- CONTACTS -->
+<div class="page active" id="tab-contacts">
+  <div class="main">
+
+    <div class="block-title">Площадка</div>
+    <div class="contacts-grid">
+      <div class="contact-card key">
+        <div class="contact-avatar">С</div>
+        <div class="contact-info">
+          <div class="contact-role">Площадка, еда, техника</div>
+          <div class="contact-name">Степан</div>
+          <div class="contact-phone">+7 977 834-82-08</div>
+        </div>
+      </div>
+      <div class="contact-card key">
+        <div class="contact-avatar">🔒</div>
+        <div class="contact-info">
+          <div class="contact-role">Охрана — позвони при въезде</div>
+          <div class="contact-name">Охрана клуба</div>
+          <div class="contact-phone">+7 977 834-82-23</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block-title">Подрядчики</div>
+    <div class="contacts-grid">
+      <div class="contact-card">
+        <div class="contact-avatar">Д</div>
+        <div class="contact-info">
+          <div class="contact-role">Ведущий</div>
+          <div class="contact-name">Данила</div>
+          <div class="contact-phone">+7 927 478-61-01</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Л</div>
+        <div class="contact-info">
+          <div class="contact-role">Диджей · запускает ролик</div>
+          <div class="contact-name">Лёша</div>
+          <div class="contact-phone">+7 968 506-01-20</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">К</div>
+        <div class="contact-info">
+          <div class="contact-role">Кавер-группа (контакт)</div>
+          <div class="contact-name">Кристина</div>
+          <div class="contact-phone">+7 915 998-34-37</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Р</div>
+        <div class="contact-info">
+          <div class="contact-role">Фокусник</div>
+          <div class="contact-name">Рома</div>
+          <div class="contact-phone">+7 906 052-57-65</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">А</div>
+        <div class="contact-info">
+          <div class="contact-role">Плазма 86"</div>
+          <div class="contact-name">Алан</div>
+          <div class="contact-phone">+7 968 863-00-35</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Н</div>
+        <div class="contact-info">
+          <div class="contact-role">Фотограф</div>
+          <div class="contact-name">Никита</div>
+          <div class="contact-phone">+7 920 556-60-02</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Н</div>
+        <div class="contact-info">
+          <div class="contact-role">Фотозона / декор</div>
+          <div class="contact-name">Никита</div>
+          <div class="contact-phone">+7 916 273-14-88</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Д</div>
+        <div class="contact-info">
+          <div class="contact-role">Игра телешоу</div>
+          <div class="contact-name">Даша</div>
+          <div class="contact-phone">+7 925 199-44-85</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">Е</div>
+        <div class="contact-info">
+          <div class="contact-role">Кондитер · везёт торт</div>
+          <div class="contact-name">Екатерина</div>
+          <div class="contact-phone">+7 910 414-23-68</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-avatar">А</div>
+        <div class="contact-info">
+          <div class="contact-role">Трансфер (автобус)</div>
+          <div class="contact-name">Анна</div>
+          <div class="contact-phone">+7 985 922-71-99</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="block-title">Парковка — 8 машиномест</div>
+    <div class="parking-grid">
+      <div class="parking-slot"><div class="slot-num">МЕСТО 1</div><div class="slot-name">Кристина<br><span style="font-size:11px;color:var(--text-muted)">Кавер-группа</span></div></div>
+      <div class="parking-slot"><div class="slot-num">МЕСТО 2</div><div class="slot-name">Никита<br><span style="font-size:11px;color:var(--text-muted)">Фотозона</span></div></div>
+      <div class="parking-slot"><div class="slot-num">МЕСТО 3</div><div class="slot-name">Никита<br><span style="font-size:11px;color:var(--text-muted)">Фотограф</span></div></div>
+      <div class="parking-slot"><div class="slot-num">МЕСТО 4</div><div class="slot-name">Лёша<br><span style="font-size:11px;color:var(--text-muted)">Диджей</span></div></div>
+      <div class="parking-slot"><div class="slot-num">МЕСТО 5</div><div class="slot-name">Рома<br><span style="font-size:11px;color:var(--text-muted)">Фокусник</span></div></div>
+      <div class="parking-slot"><div class="slot-num">МЕСТО 6</div><div class="slot-name">Даша<br><span style="font-size:11px;color:var(--text-muted)">Игра</span></div></div>
+      <div class="parking-slot reserve"><div class="slot-num">МЕСТО 7</div><div class="slot-name">Запас</div></div>
+      <div class="parking-slot reserve"><div class="slot-num">МЕСТО 8</div><div class="slot-name">Запас</div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="block-title">Питание подрядчиков — 9 ланчей</div>
+    <div class="food-block">
+      <div class="food-title">Греческий салат · филе цыплёнка под сливочно-грибным соусом с картофелем · чай/кофе · морс</div>
+      <div class="food-item"><span class="food-count">6</span> Кавер-группа — едят ~13:00, между саундчеком и 1-м сетом</div>
+      <div class="food-item"><span class="food-count">1</span> Лёша (диджей)</div>
+      <div class="food-item"><span class="food-count">1</span> Данила (ведущий)</div>
+      <div class="food-item"><span class="food-count">1</span> Даша (координатор)</div>
+      <div class="food-note">Воду для кавер-группы организуем сами — площадка не предоставляет. Закуски в гримёрку к 11:00.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INFO -->
+<div class="page" id="tab-info">
+  <div class="main">
+    <div class="block-title">Нюансы площадки</div>
+    <div class="info-grid">
+      <div class="info-card warn">
+        <div class="info-label">Въезд — ворота закрыты</div>
+        <div class="info-value">Звони охране при подъезде:<br><strong>+7 977 834-82-23</strong></div>
+      </div>
+      <div class="info-card warn">
+        <div class="info-label">Автобус с гостями</div>
+        <div class="info-value">Автобус на территорию не заедет. Гостей высаживают у ворот. Встречай снаружи.</div>
+      </div>
+      <div class="info-card amber">
+        <div class="info-label">Кодовое слово</div>
+        <div class="info-value">Если гость спрашивает, туда ли попал:<br><strong>«Виталис»</strong></div>
+      </div>
+      <div class="info-card warn">
+        <div class="info-label">Дождь</div>
+        <div class="info-value">Если дождь — всё переносим внутрь.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Звук</div>
+        <div class="info-value">Используем фронтлайн с площадки, бэклайн привозит группа сама.</div>
+      </div>
+      <div class="info-card green">
+        <div class="info-label">Торт</div>
+        <div class="info-value">Площадка готова принять торт в своё хранение.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Алкоголь</div>
+        <div class="info-value">На столах гостей бутылок нет. Всё разливает персонал с постановочных столов.</div>
+      </div>
+      <div class="info-card warn">
+        <div class="info-label">Фокусник — конфетти запрещено</div>
+        <div class="info-value">Номер «Снежный шторм» с конфетти — площадка запретила. Предупреди Рому до выступления.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Ролик о компании</div>
+        <div class="info-value">Запускает Лёша.</div>
+      </div>
+      <div class="info-card amber">
+        <div class="info-label">Документы</div>
+        <div class="info-value">Не забыть передать Степану на месте.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Гримёрка</div>
+        <div class="info-value">Одна на всех подрядчиков.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="page" id="tab-timeline">
+  <div class="main">
+    <div class="tl-block">
+
+      <div class="tl-row">
+        <div class="tl-time">13:15</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Посадка на трансфер</div>
+          <div class="tl-sub">13:15 — 13:45</div>
+        </div>
+      </div>
+
+      <div class="tl-row hot">
+        <div class="tl-time">14:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Welcome — встреча гостей у ворот</div>
+          <div class="tl-sub">до 15:00</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">15:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Официальная часть + показ ролика + банкет</div>
+          <div class="tl-sub">до 16:00</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">16:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Кавер-группа — 1-й выход</div>
+          <div class="tl-sub">до 16:30</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">16:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Игра в стиле телешоу</div>
+          <div class="tl-sub">до 18:00</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">18:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Кавер-группа — 2-й выход</div>
+          <div class="tl-sub">до 18:30</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">18:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Фокусник Рома</div>
+          <div class="tl-sub">до 19:00</div>
+        </div>
+      </div>
+
+      <div class="tl-row hot">
+        <div class="tl-time">19:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Вынос торта</div>
+          <div class="tl-sub">до 19:15 · предупреди Степана в 18:45</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">19:15</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Кавер-группа — 3-й выход</div>
+          <div class="tl-sub">до 19:45</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">19:45</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Завершение программы</div>
+          <div class="tl-sub">до 20:00</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- VENDORS -->
+<div class="page" id="tab-vendors">
+  <div class="main">
+    <div class="tl-block">
+
+      <div class="tl-row">
+        <div class="tl-time">11:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Кавер-группа — Кристина</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">11:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Фотозона — Никита</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">11–12</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Плазма 86" — Алан</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">12–12:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Диджей — Лёша</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">13:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Ведущий — Данила</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">13–16</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Торт — Екатерина</div>
+          <div class="tl-sub">Приедет в промежуток 13:00–16:00, уточни время заранее</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">13:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Фотограф — Никита</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">15–15:30</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Игра телешоу — Даша</div>
+        </div>
+      </div>
+
+      <div class="tl-row">
+        <div class="tl-time">18:00</div>
+        <div class="tl-dot"></div>
+        <div class="tl-card">
+          <div class="tl-title">Фокусник — Рома</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="page" id="tab-checklist">
+  <div class="main">
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">Все</button>
+      <button class="filter-btn" data-filter="open">Не выполнено</button>
+      <button class="filter-btn" data-filter="urgent">Важные</button>
+      <button class="filter-btn" data-filter="done">Выполнено</button>
+    </div>
+    <div id="checklist-sections"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>Координатор Даша · Яхт-клуб Pelican</div>
+  <button class="reset-btn" id="reset-btn">Сбросить чеклист</button>
+</div>
+
+<script>
+const CHECKLIST = [
+  {id:'mount', icon:'🔧', title:'Монтаж (11:00–13:00)', items:[
+    {t:'Позвонила охране до въезда: +7 977 834-82-23', hot:true},
+    {t:'Получила закуски в гримёрку от Степана к 11:00'},
+    {t:'Кристина (кавер) — на месте, парковка 1'},
+    {t:'Никита (фотозона) — на месте, парковка 2'},
+    {t:'Никита (фотограф) — на месте, парковка 3'},
+    {t:'Лёша (диджей) — на месте, парковка 4'},
+    {t:'Рома (фокусник) — на месте, парковка 5', n:'Сразу предупреди: конфетти запрещено на площадке'},
+    {t:'Даша (игра) — на месте, парковка 6'},
+    {t:'Алан (плазма) — на месте'},
+    {t:'Данила (ведущий) — на месте'},
+    {t:'Торт принят от Екатерины, передан в хранение площадки', hot:true},
+    {t:'Пуфики расставлены (20 шт)'},
+    {t:'Фотозона установлена'},
+    {t:'Плазма 86" установлена и подключена к Лёше'},
+    {t:'Саундчек кавер-группы проведён'},
+    {t:'Тест-показ ролика через Лёшу на плазме — ок', hot:true},
+    {t:'Микрофон ведущего проверен'},
+    {t:'Ланч для группы (6 чел) организован + вода своя', hot:true},
+  ]},
+  {id:'before', icon:'✅', title:'Финальный обход (~13:00)', items:[
+    {t:'Площадка чистая, монтажный мусор убран'},
+    {t:'Столы накрыты, посуда расставлена'},
+    {t:'Welcome-зона готова: напитки и закуски на месте'},
+    {t:'Все подрядчики знают свой тайминг'},
+    {t:'Тайминг распечатан и роздан Даниле, Степану, кейтерингу'},
+    {t:'Рома подтвердил: конфетти убрал из программы', hot:true},
+  ]},
+  {id:'welcome', icon:'👋', title:'Welcome (14:00–15:00)', items:[
+    {t:'Встречаю гостей у ворот — автобус не заезжает', hot:true},
+    {t:'Кейтеринг подаёт welcome: напитки и закуски'},
+    {t:'Все 35 гостей внутри'},
+  ]},
+  {id:'program', icon:'🎬', title:'Программа', items:[
+    {g:'15:00 — Официальная часть'},
+    {t:'Отмашка Даниле — начало'},
+    {t:'Отмашка Лёше — запуск ролика'},
+    {t:'Отмашка кейтерингу — горячая подача'},
+    {g:'16:00 — Кавер №1'},
+    {t:'За 5 мин предупредила Кристину'},
+    {g:'16:30 — Игра телешоу'},
+    {t:'Даша (игра) и Данила в позиции'},
+    {g:'18:00 — Кавер №2'},
+    {t:'За 5 мин предупредила Кристину'},
+    {g:'18:30 — Фокусник'},
+    {t:'Рома готов, реквизит на месте'},
+    {t:'Ещё раз: конфетти убрал', hot:true},
+    {g:'18:45 — Подготовка торта'},
+    {t:'Предупредила Степана: готовить торт к выносу', hot:true},
+    {g:'19:15 — Кавер №3'},
+    {t:'За 5 мин предупредила Кристину'},
+  ]},
+  {id:'finish', icon:'🏁', title:'Завершение (19:45–20:00)', items:[
+    {t:'Данила закрыл программу'},
+    {t:'Позвонила Анне (трансфер) — автобус подан'},
+    {t:'Степану переданы документы', hot:true},
+    {t:'Демонтаж подрядчиков завершён'},
+    {t:'Площадка сдана — претензий нет'},
+  ]},
+];
+
+const STORE_KEY = 'coord_dasha_pelican_v2';
+let state = {};
+try { const s = localStorage.getItem(STORE_KEY); if(s) state = JSON.parse(s); } catch(e){}
+function allKeys(){ const k=[]; CHECKLIST.forEach(s=>s.items.forEach((it,i)=>{ if(it.t) k.push(s.id+'_'+i); })); return k; }
+allKeys().forEach(k=>{ if(!(k in state)) state[k]=false; });
+function save(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){} }
+function countSec(sec){ let t=0,d=0; sec.items.forEach((it,i)=>{ if(it.t){ t++; if(state[sec.id+'_'+i]) d++; } }); return {t,d}; }
+function updateHeader(){
+  let total=0,done=0;
+  CHECKLIST.forEach(s=>{ const c=countSec(s); total+=c.t; done+=c.d; });
+  document.getElementById('hd').textContent=done;
+  document.getElementById('ht').textContent=total;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('ring-pct').textContent=pct+'%';
+  const circ=2*Math.PI*20;
+  document.getElementById('ring').style.strokeDashoffset=circ-(circ*pct/100);
+}
+let currentFilter='all';
+function renderChecklist(){
+  const container=document.getElementById('checklist-sections');
+  container.innerHTML='';
+  CHECKLIST.forEach(sec=>{
+    const {t:total,d:done}=countSec(sec);
+    const pct=total?Math.round(done/total*100):0;
+    const allDone=done===total&&total>0;
+    if(currentFilter==='done'&&done===0) return;
+    if(currentFilter==='open'&&done===total&&total>0) return;
+    if(currentFilter==='urgent'){ const hasU=sec.items.some((it,i)=>it.hot&&!state[sec.id+'_'+i]); if(!hasU) return; }
+    let itemsHtml='';
+    sec.items.forEach((it,i)=>{
+      if(it.g){ itemsHtml+=`<div class="group-label">${it.g}</div>`; return; }
+      const key=sec.id+'_'+i;
+      const checked=state[key];
+      if(currentFilter==='open'&&checked) return;
+      if(currentFilter==='done'&&!checked) return;
+      if(currentFilter==='urgent'&&!it.hot) return;
+      itemsHtml+=`<div class="item${checked?' checked':''}${it.hot?' urgent':''}" data-key="${key}">
+        <div class="cb"><div class="checkmark"></div></div>
+        <div class="item-content">
+          <div class="item-label">${it.t}${it.hot?'<span class="hot-badge">важно</span>':''}</div>
+          ${it.n?`<div class="item-note">${it.n}</div>`:''}
+        </div>
+      </div>`;
+    });
+    if(!itemsHtml.replace(/<div class="group-label">.*?<\/div>/g,'').trim()) return;
+    const secEl=document.createElement('div');
+    secEl.className='section'+(allDone?' all-done':'');
+    secEl.innerHTML=`
+      <div class="section-head">
+        <div class="sec-icon">${sec.icon}</div>
+        <div class="sec-title">${sec.title}</div>
+        <div class="sec-bar"><div class="sec-bar-fill" style="width:${pct}%;background:${allDone?'var(--green)':'var(--accent)'}"></div></div>
+        <div class="sec-badge${allDone?' done':''}">${done}/${total}</div>
+        <div class="chevron">▾</div>
+      </div>
+      <div class="section-body">${itemsHtml}</div>`;
+    secEl.querySelector('.section-head').addEventListener('click',()=>secEl.classList.toggle('collapsed'));
+    secEl.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('click',()=>{ const k=el.dataset.key; state[k]=!state[k]; save(); renderChecklist(); updateHeader(); });
+    });
+    container.appendChild(secEl);
+  });
+}
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    const tabEl = document.getElementById('tab-'+btn.dataset.tab);
+    if(tabEl) tabEl.classList.add('active');
+  });
+});
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter=btn.dataset.filter;
+    renderChecklist();
+  });
+});
+document.getElementById('reset-btn').addEventListener('click',()=>{
+  if(confirm('Сбросить чеклист?')){ allKeys().forEach(k=>state[k]=false); save(); renderChecklist(); updateHeader(); }
+});
+renderChecklist();
+updateHeader();
+</script>
+</body>
+</html>
