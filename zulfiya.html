@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как зовут Зульфию?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-display {
+      font-family: 'Unbounded', sans-serif;
+    }
+    
+    @keyframes shake-wrong {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px) rotate(-1.5deg); }
+      40%, 80% { transform: translateX(6px) rotate(1.5deg); }
+    }
+    
+    @keyframes pop-win {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15) rotate(2deg); }
+      100% { transform: scale(1.05); }
+    }
+
+    .animate-shake {
+      animation: shake-wrong 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    .animate-win {
+      animation: pop-win 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-rose-500 selection:text-white relative overflow-x-hidden">
+  
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800 shadow-2xl py-4 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
+          <span class="text-xs uppercase tracking-widest font-semibold text-rose-400">Великая загадка человечества</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black font-display tracking-tight bg-gradient-to-r from-rose-400 via-fuchsia-300 to-amber-300 bg-clip-text text-transparent">
+          Как зовут Зульфию?
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-5 py-2.5 shadow-inner">
+        <div class="text-center px-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Ошибок</div>
+          <div id="failCount" class="text-xl sm:text-2xl font-black text-rose-400 font-display">0</div>
+        </div>
+        <div class="h-8 w-px bg-slate-800"></div>
+        <div class="text-center px-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Всего имен</div>
+          <div class="text-xl sm:text-2xl font-black text-amber-400 font-display">150</div>
+        </div>
+        <div class="h-8 w-px bg-slate-800"></div>
+        <button id="resetBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-2 rounded-xl transition duration-150 active:scale-95">
+          Сброс
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
+    <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900/60 to-rose-950/40 border border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-slate-300 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl shrink-0">
+          🤔
+        </div>
+        <div>
+          <span class="font-bold text-white">Правило предельно простое:</span>
+          перед вами ровно 150 женских имён. Найдите истинное имя Зульфии с первой попытки!
+        </div>
+      </div>
+      <div class="w-full md:w-72 relative">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Быстрый поиск имени..." 
+          class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition shadow-inner"
+        />
+      </div>
+    </div>
+
+    <div id="namesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+      <!-- Generated via JS -->
+    </div>
+  </main>
+
+  <div id="winModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-[0_0_60px_-15px_rgba(16,185,129,0.5)] transform scale-95 transition-transform duration-300 relative overflow-hidden" id="modalCard">
+      <!-- Glow ambient effect -->
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center relative z-10">
+        <div class="inline-flex p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-4xl mb-3 animate-bounce">
+          🎉
+        </div>
+        <h2 class="text-3xl font-black font-display text-white mb-2">ПОЗДРАВЛЯЕМ!</h2>
+        <p class="text-emerald-400 font-semibold text-lg mb-1">Вы раскрыли величайшую тайну!</p>
+        <p class="text-slate-300 text-sm mb-6">Зульфию, разумеется, зовут <strong class="text-emerald-300 underline underline-offset-4 decoration-emerald-500">Айгуль</strong>!</p>
+
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 mb-6 text-left shadow-inner">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs uppercase tracking-wider font-bold text-amber-400">А теперь решай судоку:</span>
+            <span class="text-xs text-slate-400 font-mono" id="sudokuTimer">Мини 4x4</span>
+          </div>
+
+          <!-- Mini Sudoku grid (4x4 for delightful quick fun) -->
+          <div id="sudokuGrid" class="grid grid-cols-4 gap-1.5 max-w-[240px] mx-auto p-2 bg-slate-950 rounded-xl border border-slate-800">
+            <!-- Cells generated via JS -->
+          </div>
+          <div id="sudokuMsg" class="text-center text-xs mt-3 min-h-[1.25rem] font-semibold text-slate-400">
+            Заполните пустые клетки числами от 1 до 4!
+          </div>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+          <button id="closeModalBtn" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition active:scale-95">
+            Назад к списку
+          </button>
+          <button id="checkSudokuBtn" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm transition shadow-lg shadow-emerald-500/25 active:scale-95">
+            Проверить судоку
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio synthesizer using Web Audio API for sound feedback
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playBeep(freq = 200, type = 'sine', duration = 0.15) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playWrongSound() {
+      playBeep(160, 'sawtooth', 0.22);
+    }
+
+    function playWinSound() {
+      const notes = [440, 554.37, 659.25, 880];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playBeep(freq, 'triangle', 0.25), idx * 100);
+      });
+    }
+
+    // Exact list of 150 unique female names
+    // Must include "Айгуль" (the winner) and "Алика"
+    const rawNames = [
+      "Айгуль", "Алика", "Алина", "Амина", "Алсу", "Аделина", "Анастасия", "Анна", "Александра", "Алёна",
+      "Ангелина", "Арина", "Альбина", "Аниса", "Айсель", "Айнур", "Айше", "Айгерим", "Адель", "Аврора",
+      "Агата", "Агнесса", "Аксинья", "Алевтина", "Алла", "Альфия", "Амалия", "Анжелика", "Антонина", "Асия",
+      "Белла", "Богдана", "Бронислава", "Валентина", "Валерия", "Варвара", "Василиса", "Венера", "Вера", "Вероника",
+      "Виктория", "Виолетта", "Влада", "Владислава", "Галина", "Гульназ", "Гузель", "Гульчачак", "Гульнара", "Гюзель",
+      "Дамира", "Дана", "Дания", "Дарья", "Диана", "Диляра", "Дина", "Динара", "Ева", "Евгения",
+      "Екатерина", "Елена", "Елизавета", "Жанна", "Жасмин", "Зарина", "Земфира", "Злата", "Зухра", "Иванна",
+      "Илона", "Инга", "Инесса", "Инна", "Ираида", "Ирина", "Ирма", "Камилла", "Карина", "Каролина",
+      "Кира", "Клавдия", "Клара", "Кристина", "Ксения", "Лада", "Лариса", "Лейла", "Леонида", "Лиана",
+      "Лидия", "Лилия", "Лина", "Лолита", "Луиза", "Любовь", "Людмила", "Мадина", "Майя", "Маргарита",
+      "Марианна", "Марина", "Мария", "Марта", "Марьям", "Мила", "Милана", "Милена", "Мирослава", "Надежда",
+      "Наиля", "Нана", "Наринэ", "Наталья", "Нелли", "Ника", "Нина", "Нонна", "Оксана", "Олеся",
+      "Ольга", "Полина", "Рада", "Раиса", "Регина", "Рената", "Римма", "Роза", "Роксана", "Руслана",
+      "Сабина", "Салима", "Светлана", "Серафима", "Снежана", "София", "Станислава", "Стелла", "Сусанна", "Таисия",
+      "Тамара", "Татьяна", "Ульяна", "Фатима", "Феодора", "Хадиджа", "Чулпан", "Эвелина", "Элеонора", "Эльвира",
+      "Эльза", "Эмилия", "Юлия", "Яна", "Ярослава"
+    ];
+
+    // Ensure array contains exactly 150 items
+    let names = Array.from(new Set(rawNames));
+    while (names.length < 150) {
+      names.push(`Имя #${names.length + 1}`);
+    }
+    names = names.slice(0, 150);
+
+    let fails = 0;
+    const grid = document.getElementById('namesGrid');
+    const failDisplay = document.getElementById('failCount');
+    const searchInput = document.getElementById('searchInput');
+    const resetBtn = document.getElementById('resetBtn');
+    const winModal = document.getElementById('winModal');
+    const modalCard = document.getElementById('modalCard');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const checkSudokuBtn = document.getElementById('checkSudokuBtn');
+    const sudokuMsg = document.getElementById('sudokuMsg');
+
+    // Shuffle helper to make search fun
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    let shuffledNames = shuffleArray(names);
+
+    function renderNames(filterText = '') {
+      grid.innerHTML = '';
+      const filter = filterText.trim().toLowerCase();
+
+      shuffledNames.forEach((name) => {
+        const isMatch = name.toLowerCase().includes(filter);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.name = name;
+        
+        btn.className = `group relative overflow-hidden py-3 px-3 rounded-2xl text-center text-sm font-semibold tracking-wide border transition-all duration-200 select-none shadow-sm active:scale-95 ${
+          !isMatch ? 'hidden' : 'flex items-center justify-center'
+        } bg-slate-900/90 text-slate-200 border-slate-800 hover:border-slate-700 hover:bg-slate-800 hover:text-white`;
+
+        btn.innerHTML = `
+          <span class="relative z-10 truncate pointer-events-none">${name}</span>
+          <span class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+        `;
+
+        btn.addEventListener('click', () => handleNameClick(btn, name));
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleNameClick(btn, name) {
+      if (btn.dataset.clicked === 'true') return;
+
+      if (name === 'Айгуль') {
+        // WINNER!
+        playWinSound();
+        btn.dataset.clicked = 'true';
+        btn.className = 'group relative overflow-hidden py-3 px-3 rounded-2xl text-center text-sm font-black tracking-wide border transition-all duration-300 select-none shadow-lg bg-emerald-600 text-white border-emerald-400 shadow-emerald-500/50 animate-win flex items-center justify-center';
+        
+        // Canvas confetti burst
+        confetti({
+          particleCount: 140,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#34d399', '#f59e0b', '#ec4899', '#8b5cf6']
+        });
+
+        // Extended confetti shower
+        setTimeout(() => {
+          confetti({
+            particleCount: 80,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#10b981', '#38bdf8']
+          });
+          confetti({
+            particleCount: 80,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#ec4899', '#f59e0b']
+          });
+        }, 250);
+
+        showVictoryModal();
+      } else {
+        // WRONG!
+        btn.dataset.clicked = 'true';
+        fails++;
+        failDisplay.textContent = fails;
+        playWrongSound();
+
+        // Turn red and shake
+        btn.className = 'group relative overflow-hidden py-3 px-3 rounded-2xl text-center text-sm font-semibold tracking-wide border transition-all duration-200 select-none shadow bg-rose-600/90 text-white border-rose-500 shadow-rose-900/40 animate-shake flex items-center justify-center opacity-90 cursor-not-allowed';
+      }
+    }
+
+    function showVictoryModal() {
+      setTimeout(() => {
+        winModal.classList.remove('hidden');
+        setTimeout(() => {
+          winModal.classList.remove('opacity-0');
+          modalCard.classList.remove('scale-95');
+          modalCard.classList.add('scale-100');
+        }, 10);
+        buildSudoku();
+      }, 500);
+    }
+
+    function hideVictoryModal() {
+      modalCard.classList.remove('scale-100');
+      modalCard.classList.add('scale-95');
+      winModal.classList.add('opacity-0');
+      setTimeout(() => {
+        winModal.classList.add('hidden');
+      }, 300);
+    }
+
+    closeModalBtn.addEventListener('click', hideVictoryModal);
+    winModal.addEventListener('click', (e) => {
+      if (e.target === winModal) hideVictoryModal();
+    });
+
+    // 4x4 Mini Sudoku Generator
+    // Solution template:
+    // 1 2 3 4
+    // 3 4 1 2
+    // 2 1 4 3
+    // 4 3 2 1
+    const sudokuSolution = [
+      [1, 2, 3, 4],
+      [3, 4, 1, 2],
+      [2, 1, 4, 3],
+      [4, 3, 2, 1]
+    ];
+
+    // Pre-filled positions (true = static clue, false = user input)
+    const sudokuGiven = [
+      [true, false, true, false],
+      [false, true, false, true],
+      [true, false, true, false],
+      [false, true, false, false]
+    ];
+
+    function buildSudoku() {
+      const container = document.getElementById('sudokuGrid');
+      container.innerHTML = '';
+      sudokuMsg.textContent = 'Заполните пустые ячейки (1-4) без повторов в строках, столбцах и блоках 2×2';
+      sudokuMsg.className = 'text-center text-xs mt-3 min-h-[1.25rem] font-semibold text-slate-400';
+
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const val = sudokuSolution[r][c];
+          const isGiven = sudokuGiven[r][c];
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.maxLength = 1;
+          input.dataset.row = r;
+          input.dataset.col = c;
+          
+          let borderClasses = 'border border-slate-700';
+          if (c === 1) borderClasses += ' border-r-2 border-r-slate-400';
+          if (r === 1) borderClasses += ' border-b-2 border-b-slate-400';
+
+          if (isGiven) {
+            input.value = val;
+            input.readOnly = true;
+            input.className = `w-11 h-11 text-center font-display font-black text-base text-amber-300 bg-slate-800 rounded-lg ${borderClasses} cursor-default select-none`;
+          } else {
+            input.value = '';
+            input.className = `w-11 h-11 text-center font-display font-black text-base text-white bg-slate-900 hover:bg-slate-800/80 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 rounded-lg ${borderClasses} transition`;
+            
+            // Allow only digits 1-4
+            input.addEventListener('input', (e) => {
+              const cleaned = e.target.value.replace(/[^1-4]/g, '');
+              e.target.value = cleaned;
+            });
+          }
+          container.appendChild(input);
+        }
+      }
+    }
+
+    // Verify sudoku
+    checkSudokuBtn.addEventListener('click', () => {
+      const inputs = document.querySelectorAll('#sudokuGrid input');
+      let allCorrect = true;
+      let allFilled = true;
+
+      inputs.forEach(input => {
+        const r = parseInt(input.dataset.row, 10);
+        const c = parseInt(input.dataset.col, 10);
+        const val = parseInt(input.value, 10);
+
+        if (!val) {
+          allFilled = false;
+        } else if (val !== sudokuSolution[r][c]) {
+          allCorrect = false;
+        }
+      });
+
+      if (!allFilled) {
+        sudokuMsg.textContent = '⚠️ Заполните все клеточки перед проверкой!';
+        sudokuMsg.className = 'text-center text-xs mt-3 min-h-[1.25rem] font-bold text-amber-400';
+        playBeep(220, 'sawtooth', 0.15);
+      } else if (!allCorrect) {
+        sudokuMsg.textContent = '❌ Где-то закралась ошибка. Попробуйте ещё!';
+        sudokuMsg.className = 'text-center text-xs mt-3 min-h-[1.25rem] font-bold text-rose-400';
+        playWrongSound();
+      } else {
+        sudokuMsg.textContent = '🎉 Судоку решено! Зульфия-Айгуль гордится вами!';
+        sudokuMsg.className = 'text-center text-xs mt-3 min-h-[1.25rem] font-bold text-emerald-400';
+        playWinSound();
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.5 }
+        });
+      }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      renderNames(e.target.value);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      fails = 0;
+      failDisplay.textContent = '0';
+      searchInput.value = '';
+      shuffledNames = shuffleArray(names);
+      renderNames();
+    });
+
+    // Initial render
+    renderNames();
+  </script>
+</body>
+</html>
